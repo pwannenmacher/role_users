@@ -1,4 +1,5 @@
-#.github/workflows/yaml-lint.yml
+---
+# .github/workflows/yaml-lint.yml
 name: Yamllint GitHub Actions
 on:
   push:

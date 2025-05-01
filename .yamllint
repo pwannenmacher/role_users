@@ -8,3 +8,6 @@ rules:
 
 skip_list:
   - yaml[line-length]
+
+ignore:
+  - ./.github
