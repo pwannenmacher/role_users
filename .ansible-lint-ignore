@@ -1,0 +1,5 @@
+# This file contains ignores rule violations for ansible-lint
+roles/role_backup/tasks/main.yml package-latest
+roles/role_k3s/tasks/main.yml command-instead-of-module
+roles/role_k3s/tasks/main.yml risky-shell-pipe
+roles/role_vcloud_setup/tasks/main.yml no-handler

@@ -1,0 +1,10 @@
+/.idea/
+/.vscode/
+.DS_Store
+.env
+ansible.cfg
+inventory.yml
+tmp/
+.vault.pw
+pass_*
+info_*
