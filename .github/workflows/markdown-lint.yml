@@ -1,0 +1,15 @@
+---
+# .github/workflows/yaml-lint.yml
+name: markdownlint
+on:
+  push:
+  pull_request:
+    branches: ["main", "stable", "release/v*"]
+jobs:
+  delivery:
+    name: Markdownlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run mdl
+        uses: actionshub/markdownlint@main
