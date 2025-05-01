@@ -14,11 +14,11 @@ Users have to be defined like this:
 users:
   - name: username
     comment: Some User
-    groups: 
+    groups:
       - users
       - admin
-    password_hash: "$6$RQJceekL9DN9Z2HL$cKcX5.Ja21cVK/wCDoX21X7Im8KNPo43WLUbJFBNcSuJRUvDwIzj2HaT/oQqNiV8YEjsRaxKLTUHz1zIthe6D1" 
-    password: "P@$$w0rd" 
+    password_hash: "$6$RQJceekL9DN9Z2HL$cKcX5.Ja21cVK/wCDoX21X7Im8KNPo43WLUbJFBNcSuJRUvDwIzj2HaT/oQqNiV8YEjsRaxKLTUHz1zIthe6D1"
+    password: "P@$$w0rd"
     password_salt: "S@LT"
     sudo: true
     passwordless_sudo: true
