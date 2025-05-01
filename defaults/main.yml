@@ -1,0 +1,7 @@
+---
+# defaults file for deploy_users
+user_groups: []
+additional_user_groups: []
+users: {}
+additional_users: []
+passwordless_sudo: false

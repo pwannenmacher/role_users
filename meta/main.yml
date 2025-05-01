@@ -1,0 +1,34 @@
+---
+galaxy_info:
+  role_name: role_users
+  namespace: pwannenmacher
+  author: Paul Wannenmacher
+  description: Creates Users on remote host and installs their ssh pub keys. Removes all undefined users exept the ansible-user.
+  company: Wannenmacher
+
+  issue_tracker_url: https://github.com/pwannenmacher/role-users
+
+  license: MIT
+
+  min_ansible_version: "2.9"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+        - focal
+        - jammy
+    - name: Debian
+      versions:
+        - stretch
+        - buster
+        - bullseye
+
+  galaxy_tags:
+    - users
+    - debian
+    - ubuntu
+    - updates
+
+dependencies: []

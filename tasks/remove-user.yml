@@ -1,0 +1,18 @@
+---
+- name: Remove user {{ item }}
+  ansible.builtin.user:
+    name: "{{ item }}"
+    state: absent
+    remove: true
+
+- name: Remove user from sudo
+  ansible.builtin.file:
+    path: /etc/sudoers.d/{{ item }}
+    state: absent
+
+- name: Passwordless sudo
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: absent
+    line: "{{ item }} ALL=(ALL:ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"

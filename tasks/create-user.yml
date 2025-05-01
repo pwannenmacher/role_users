@@ -1,0 +1,92 @@
+---
+- name: Determine available groups - {{ item.name }}
+  ansible.builtin.getent:
+    database: group
+
+- name: Add 'docker' to user_groups if user is in docker_users  - {{ item.name }}
+  ansible.builtin.set_fact:
+    user_groups: "{{ item.groups + ['docker'] | unique }}"
+  when:
+    - "'docker' in ansible_facts.getent_group"
+    - docker_users is defined and item.name in docker_users | list or item.name == ansible_ssh_user
+
+# generate password with:  mkpasswd --method=sha-512
+- name: Create user - {{ item.name }}
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment }}"
+    groups: "{{ user_groups }}"
+    state: present
+    shell: /bin/bash
+    password: "{{ item.password_hash }}"
+  when: item.password_hash is defined
+  register: user_created
+
+- name: Create user - {{ item.name }}
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment }}"
+    groups: "{{ user_groups }}"
+    state: present
+    shell: /bin/bash
+    password: "{{ item.password | password_hash('sha512', item.password_salt) }}"
+  when: item.password is defined and item.password_salt is defined and user_created is not defined
+  register: user_created
+
+- name: Set user password - {{ item.name }}
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | password_hash('sha512', item.password_salt) }}"
+  when: item.password is defined and item.password_salt is defined and user_created is not defined
+
+- name: Set user password - {{ item.name }}
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    password: "{{ item.password_hash }}"
+  when: item.password_hash is defined and user_created is not defined
+
+- name: Add user to sudo - {{ item.name }}
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/{{ item.name }}
+    regexp: "^{{ item.name }} ALL"
+    line: "{{ item.name }} ALL=(ALL:ALL) NOPASSWD: ALL"
+    state: present
+    mode: "0440"
+    create: true
+    validate: "visudo -cf %s"
+  when: item.sudo | bool and item.passwordless_sudo is defined and item.passwordless_sudo | bool
+
+- name: Add user to sudo - {{ item.name }}
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/{{ item.name }}
+    regexp: "^{{ item.name }} ALL"
+    line: "{{ item.name }} ALL=(ALL:ALL) ALL"
+    state: present
+    mode: "0440"
+    create: true
+    validate: "visudo -cf %s"
+  when: item.sudo | bool and item.passwordless_sudo is not defined or not (item.passwordless_sudo | bool)
+
+- name: Passwordless sudo - {{ item.name }}
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: "^{{ item.name }} ALL"
+    line: "{{ item.name }} ALL=(ALL:ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+  when: item.passwordless_sudo is defined and item.passwordless_sudo | bool
+
+- name: No passwordless sudo - {{ item.name }}
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: "^{{ item.name }} ALL"
+    line: "{{ item.name }} ALL=(ALL:ALL) ALL"
+    validate: "visudo -cf %s"
+  when: item.passwordless_sudo is not defined or not (item.passwordless_sudo | bool)
+
+- name: Set up authorized keys - {{ item.name }}
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.ssh_authorized_keys | join('\n') }}"
+    exclusive: true
