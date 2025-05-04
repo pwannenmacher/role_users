@@ -45,9 +45,8 @@ Only default modules are used. No dependencies.
 ```yaml
 - hosts: all
   become: true
-
   roles:
-    - role: deploy_users
+    - role: role_users
 ```
 
 ## License
