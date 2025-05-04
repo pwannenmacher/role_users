@@ -8,8 +8,6 @@ none
 
 ## Role Variables
 
-Users have to be defined like this:
-
 | Variable               | Required | Default | Choices | Comments                                                                                 |
 |------------------------|----------|---------|---------|------------------------------------------------------------------------------------------|
 | user_groups            | yes      | []      |         | List of user groups that shall exist (may be used globally or at host group level)       |
@@ -17,6 +15,8 @@ Users have to be defined like this:
 | users                  | yes      | {}      |         | List of user objects (see description below)                                             |
 | additional_users       | yes      | {}      |         | List of additional user objects (see description below)                                  |
 | passwordless_sudo      | yes      | false   |         | Allow passwordless sudo access for all sudo allowed users                                |
+
+Users have to be defined like this:
 
 ```yaml
 users:
