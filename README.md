@@ -10,6 +10,14 @@ none
 
 Users have to be defined like this:
 
+| Variable               | Required | Default | Choices | Comments                                                                                 |
+|------------------------|----------|---------|---------|------------------------------------------------------------------------------------------|
+| user_groups            | yes      | []      |         | List of user groups that shall exist (may be used globally or at host group level)       |
+| additional_user_groups | yes      | []      |         | List of additional user groups that shall exist (may be used for each host individually) |
+| users                  | yes      | {}      |         | List of user objects (see description below)                                             |
+| additional_users       | yes      | {}      |         | List of additional user objects (see description below)                                  |
+| passwordless_sudo      | yes      | false   |         | Allow passwordless sudo access for all sudo allowed users                                |
+
 ```yaml
 users:
   - name: username
