@@ -8,7 +8,7 @@
     user_groups: "{{ item.groups + ['docker'] | unique }}"
   when:
     - "'docker' in ansible_facts.getent_group"
-    - docker_users is defined and item.name in docker_users | list or item.name == ansible_ssh_user
+    - docker_users is defined and item.name in docker_users | list or ansible_user is defined and item.name == ansible_user
 
 # generate password with:  mkpasswd --method=sha-512
 - name: Create user - {{ item.name }}
