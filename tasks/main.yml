@@ -63,12 +63,12 @@
 
 - name: Ensure that ansible_user is not removed
   ansible.builtin.set_fact:
-    users_to_remove: "{{ users_to_remove | difference(ansible_user) }}"
-  when: ansible_user is defined
+    users_to_remove: "{{ users_to_remove | difference(ansible_facts['user']) }}"
+  when: ansible_facts['user'] is defined
 
 - name: Ensure that ansible_user is not removed
   ansible.builtin.set_fact:
-    users_to_remove: "{{ users_to_remove | difference(ansible_user_id) }}"
+    users_to_remove: "{{ users_to_remove | difference(ansible_facts['user_id']) }}"
 
 - name: Remove users
   ansible.builtin.include_tasks: remove-user.yml
