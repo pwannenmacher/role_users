@@ -65,7 +65,7 @@
     mode: "0440"
     create: true
     validate: "visudo -cf %s"
-  when: item.sudo | bool and item.passwordless_sudo is not defined or not (item.passwordless_sudo | bool)
+  when: item.sudo | bool and (item.passwordless_sudo is not defined or not (item.passwordless_sudo | bool))
 
 - name: Passwordless sudo - {{ item.name }}
   ansible.builtin.lineinfile:
