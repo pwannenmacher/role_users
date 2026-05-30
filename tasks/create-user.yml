@@ -5,7 +5,7 @@
 
 - name: Set user_groups from item.groups - {{ item.name }}
   ansible.builtin.set_fact:
-    user_groups: "{{ item.groups }}"
+    user_groups: "{{ item.groups | default([]) }}"
 
 - name: Add 'docker' to user_groups if user is in docker_users - {{ item.name }}
   ansible.builtin.set_fact:
