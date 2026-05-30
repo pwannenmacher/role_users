@@ -3,47 +3,41 @@
   ansible.builtin.getent:
     database: group
 
-- name: Add 'docker' to user_groups if user is in docker_users  - {{ item.name }}
+- name: Set user_groups from item.groups - {{ item.name }}
   ansible.builtin.set_fact:
-    user_groups: "{{ item.groups + ['docker'] | unique }}"
+    user_groups: "{{ item.groups }}"
+
+- name: Add 'docker' to user_groups if user is in docker_users - {{ item.name }}
+  ansible.builtin.set_fact:
+    user_groups: "{{ (user_groups + ['docker']) | unique }}"
   when:
     - "'docker' in ansible_facts.getent_group"
-    - docker_users is defined and item.name in docker_users | list or ansible_facts['user'] is defined and item.name == ansible_facts['user']
+    - docker_users is defined and item.name in docker_users | list
 
 # generate password with:  mkpasswd --method=sha-512
-- name: Create user - {{ item.name }}
+- name: Create/update user with password_hash - {{ item.name }}
   ansible.builtin.user:
     name: "{{ item.name }}"
     comment: "{{ item.comment }}"
     groups: "{{ user_groups }}"
+    append: false
     state: present
     shell: /bin/bash
     password: "{{ item.password_hash }}"
+    update_password: always
   when: item.password_hash is defined
-  register: user_created_hash
 
-- name: Create user - {{ item.name }}
+- name: Create/update user with password - {{ item.name }}
   ansible.builtin.user:
     name: "{{ item.name }}"
     comment: "{{ item.comment }}"
     groups: "{{ user_groups }}"
+    append: false
     state: present
     shell: /bin/bash
     password: "{{ item.password | password_hash('sha512', item.password_salt) }}"
-  when: item.password is defined and item.password_salt is defined and user_created_hash.skipped is defined and user_created_hash.skipped | bool
-  register: user_created
-
-- name: Set user password - {{ item.name }}
-  ansible.builtin.user:
-    name: "{{ item.name }}"
-    password: "{{ item.password_hash }}"
-  when: item.password_hash is defined and user_created_hash.skipped is defined and user_created_hash.skipped | bool
-
-- name: Set user password - {{ item.name }}
-  ansible.builtin.user:
-    name: "{{ item.name }}"
-    password: "{{ item.password | password_hash('sha512', item.password_salt) }}"
-  when: item.password is defined and item.password_salt is defined and user_created.skipped is defined and user_created.skipped | bool
+    update_password: always
+  when: item.password_hash is not defined and item.password is defined and item.password_salt is defined
 
 - name: Add user to sudo - {{ item.name }}
   ansible.builtin.lineinfile:
