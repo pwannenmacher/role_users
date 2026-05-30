@@ -48,7 +48,7 @@
     mode: "0440"
     create: true
     validate: "visudo -cf %s"
-  when: item.sudo | bool and item.passwordless_sudo is defined and item.passwordless_sudo | bool
+  when: item.sudo | default(false) | bool and item.passwordless_sudo is defined and item.passwordless_sudo | bool
 
 - name: Add user to sudo - {{ item.name }}
   ansible.builtin.lineinfile:
@@ -59,7 +59,7 @@
     mode: "0440"
     create: true
     validate: "visudo -cf %s"
-  when: item.sudo | bool and (item.passwordless_sudo is not defined or not (item.passwordless_sudo | bool))
+  when: item.sudo | default(false) | bool and (item.passwordless_sudo is not defined or not (item.passwordless_sudo | bool))
 
 - name: Passwordless sudo - {{ item.name }}
   ansible.builtin.lineinfile:
@@ -68,7 +68,7 @@
     regexp: "^{{ item.name }} ALL"
     line: "{{ item.name }} ALL=(ALL:ALL) NOPASSWD: ALL"
     validate: "visudo -cf %s"
-  when: item.passwordless_sudo is defined and item.passwordless_sudo | bool
+  when: item.sudo | default(false) | bool and item.passwordless_sudo is defined and item.passwordless_sudo | bool
 
 - name: No passwordless sudo - {{ item.name }}
   ansible.builtin.lineinfile:
@@ -77,7 +77,29 @@
     regexp: "^{{ item.name }} ALL"
     line: "{{ item.name }} ALL=(ALL:ALL) ALL"
     validate: "visudo -cf %s"
-  when: item.passwordless_sudo is not defined or not (item.passwordless_sudo | bool)
+  when: item.sudo | default(false) | bool and (item.passwordless_sudo is not defined or not (item.passwordless_sudo | bool))
+
+- name: Remove user from sudoers.d - {{ item.name }}
+  ansible.builtin.file:
+    path: /etc/sudoers.d/{{ item.name }}
+    state: absent
+  when: not (item.sudo | default(false) | bool)
+
+- name: Remove passwordless sudo from sudoers - {{ item.name }}
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: absent
+    line: "{{ item.name }} ALL=(ALL:ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+  when: not (item.sudo | default(false) | bool)
+
+- name: Remove sudo from sudoers - {{ item.name }}
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: absent
+    line: "{{ item.name }} ALL=(ALL:ALL) ALL"
+    validate: "visudo -cf %s"
+  when: not (item.sudo | default(false) | bool)
 
 - name: Set up authorized keys - {{ item.name }}
   ansible.posix.authorized_key:
