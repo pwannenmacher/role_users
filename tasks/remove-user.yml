@@ -10,6 +10,11 @@
     path: /etc/sudoers.d/{{ item }}
     state: absent
 
+- name: Remove specific sudo commands
+  ansible.builtin.file:
+    path: /etc/sudoers.d/{{ item }}_commands
+    state: absent
+
 - name: Passwordless sudo
   ansible.builtin.lineinfile:
     path: /etc/sudoers

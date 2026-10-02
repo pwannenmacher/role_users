@@ -22,7 +22,7 @@
     groups: "{{ user_groups }}"
     append: false
     state: present
-    shell: /bin/bash
+    shell: "{{ item.shell | default('/bin/bash') }}"
     password: "{{ item.password_hash }}"
     update_password: always
   when: item.password_hash is defined
@@ -34,10 +34,22 @@
     groups: "{{ user_groups }}"
     append: false
     state: present
-    shell: /bin/bash
+    shell: "{{ item.shell | default('/bin/bash') }}"
     password: "{{ item.password | password_hash('sha512', item.password_salt) }}"
     update_password: always
   when: item.password_hash is not defined and item.password is defined and item.password_salt is defined
+
+# Service users without password, e.g. for deployments via SSH key; new users
+# get a locked password, existing users keep theirs
+- name: Create/update user without password - {{ item.name }}
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment }}"
+    groups: "{{ user_groups }}"
+    append: false
+    state: present
+    shell: "{{ item.shell | default('/bin/bash') }}"
+  when: item.password_hash is not defined and (item.password is not defined or item.password_salt is not defined)
 
 - name: Add user to sudo - {{ item.name }}
   ansible.builtin.lineinfile:
@@ -100,6 +112,24 @@
     line: "{{ item.name }} ALL=(ALL:ALL) ALL"
     validate: "visudo -cf %s"
   when: not (item.sudo | default(false) | bool)
+
+- name: Allow specific commands via sudo - {{ item.name }}
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/{{ item.name }}_commands
+    content: |
+      Defaults:{{ item.name }} !requiretty
+      {{ item.name }} ALL=(root) NOPASSWD: {{ item.sudo_commands | join(', ') }}
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "visudo -cf %s"
+  when: item.sudo_commands | default([]) | length > 0
+
+- name: Remove specific sudo commands - {{ item.name }}
+  ansible.builtin.file:
+    path: /etc/sudoers.d/{{ item.name }}_commands
+    state: absent
+  when: item.sudo_commands | default([]) | length == 0
 
 - name: Set up authorized keys - {{ item.name }}
   ansible.posix.authorized_key:
